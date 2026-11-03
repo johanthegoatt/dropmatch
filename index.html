@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dropmatch — how many rolls of wallpaper you really need</title>
+  <meta name="description" content="A patterned wallpaper needs more rolls than width times height says, because every strip has to line up and the offcut is waste. Dropmatch works out the drops, the rolls, the waste and a spare, and shows how a straight match and a half-drop differ. Runs in your browser; nothing you type is uploaded.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232e7d87'/%3E%3Cg fill='%23fff'%3E%3Crect x='7' y='6' width='5' height='20' rx='1'/%3E%3Crect x='14' y='6' width='5' height='20' rx='1' opacity='.8'/%3E%3Crect x='21' y='6' width='5' height='20' rx='1' opacity='.6'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1><span class="logo" aria-hidden="true"></span> Dropmatch</h1>
+      <p class="tag">A patterned wallpaper needs more than "width times height" says, because every strip has to line up and the offcut is waste. Dropmatch works out the drops, the rolls, the waste and a spare, and shows how a straight match and a half-drop differ.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="form" class="card" autocomplete="off">
+      <fieldset class="group">
+        <legend>The walls</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Width to cover</span>
+            <input id="width" inputmode="decimal" placeholder="e.g. 10">
+          </label>
+          <label class="field">
+            <span>Height</span>
+            <input id="height" inputmode="decimal" placeholder="e.g. 2.4">
+          </label>
+          <label class="field narrow">
+            <span>in</span>
+            <select id="len-unit">
+              <option value="m">metres</option>
+              <option value="cm">cm</option>
+              <option value="ft">feet</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">For a whole room, add up every wall width right round, doors and windows included. Height is floor to ceiling (or coving).</p>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>The roll</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Roll size</span>
+            <select id="roll">
+              <option value="euro">Euro roll (UK / EU standard)</option>
+              <option value="euro-wide">Wide roll (paste-the-wall)</option>
+              <option value="us-double">US double roll (approx.)</option>
+              <option value="custom">Custom / off the label</option>
+            </select>
+          </label>
+          <label class="field narrow">
+            <span>Roll length</span>
+            <input id="roll-len" inputmode="decimal" value="10.05">
+          </label>
+          <label class="field narrow">
+            <span>Roll width</span>
+            <input id="roll-wid" inputmode="decimal" value="0.53">
+          </label>
+          <label class="field narrow">
+            <span>in</span>
+            <select id="roll-unit">
+              <option value="m">metres</option>
+              <option value="cm">cm</option>
+              <option value="ft">feet</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">Most UK and EU rolls are 10.05 m long and 53 cm wide. Choose Custom to type an odd size. Always confirm it on the roll's own label.</p>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>The pattern</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Match</span>
+            <select id="match">
+              <option value="free">Free match (plain / no repeat)</option>
+              <option value="straight" selected>Straight match</option>
+              <option value="offset">Offset / half-drop match</option>
+            </select>
+          </label>
+          <label class="field narrow">
+            <span>Pattern repeat</span>
+            <input id="repeat" inputmode="decimal" placeholder="e.g. 52">
+          </label>
+          <label class="field narrow">
+            <span>in</span>
+            <select id="rep-unit">
+              <option value="cm">cm</option>
+              <option value="mm">mm</option>
+              <option value="m">metres</option>
+              <option value="in">inches</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-row">
+          <label class="field narrow">
+            <span>Trim allowance</span>
+            <input id="trim" inputmode="decimal" placeholder="100">
+          </label>
+          <label class="field narrow">
+            <span>Spare margin %</span>
+            <input id="spare" inputmode="decimal" placeholder="10">
+          </label>
+          <label class="field narrow">
+            <span>Price per roll</span>
+            <input id="price" inputmode="decimal" placeholder="optional">
+          </label>
+        </div>
+        <p class="hint">The match type and repeat are on the roll's label. Trim is the spare at top and bottom to cut off (about 100 mm). The spare margin keeps a little back for mistakes and repairs.</p>
+      </fieldset>
+    </form>
+
+    <div class="out" id="out" aria-live="polite"></div>
+
+    <div class="actions">
+      <button id="share" class="ghost" type="button">Copy a link to this</button>
+      <span id="share-done" class="share-done" aria-live="polite"></span>
+    </div>
+
+    <section class="note">
+      <h2>Why a pattern costs you rolls</h2>
+      <p>Wallpaper goes up in vertical strips, called drops. The number of drops is the wall width divided by the roll
+      width, rounded up; how many drops you get from a roll is the roll length divided by the length of one drop, rounded
+      down. On a plain paper a drop is just the wall height plus a little to trim top and bottom. On a patterned paper
+      every drop has to begin at the same point in the design so the strips line up, so each drop is cut up to a whole
+      pattern repeat longer than the wall is tall, and that extra is waste. A straight match lines the pattern up at the
+      same height across the join; a half-drop (offset) match steps it down by half a repeat on every other strip, which
+      lines up on the diagonal and wastes more again. These are planning figures: read the length, width, repeat and
+      match off your roll's own label, and buy every roll from the same batch so the colour matches.</p>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Everything runs in your browser. Nothing you type is uploaded. <a href="https://github.com/johanthegoatt/dropmatch">Source</a>.</p>
+  </footer>
+
+  <!-- Sweep the smoothing brush -->
+  <div id="sweep-dock" class="sweep-dock">
+    <button id="sweep-hide" class="sweep-hide" type="button" aria-label="Hide Sweep">tuck away</button>
+    <div id="sweep-bubble" class="sweep-bubble" role="status" aria-live="polite"></div>
+    <button id="sweep" class="sweep" type="button" data-mood="calm" aria-label="Sweep the smoothing brush. Tap for a tip.">
+      <span class="sweep-body" aria-hidden="true">
+        <span class="sweep-bristles"></span>
+        <span class="sweep-ferrule"></span>
+        <span class="sweep-handle">
+          <span class="sweep-face">
+            <span class="sweep-eye l"></span>
+            <span class="sweep-eye r"></span>
+            <span class="sweep-mouth"></span>
+          </span>
+        </span>
+      </span>
+    </button>
+  </div>
+
+  <script src="src/core.js"></script>
+  <script src="src/sweep.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
