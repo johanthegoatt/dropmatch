@@ -1,0 +1,10 @@
+{
+  "name": "dropmatch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "How many rolls of wallpaper a room really needs: the drops, the rolls, the waste and a spare, and why a straight match and a half-drop cost different amounts. Runs in the browser, nothing uploaded. With Sweep the smoothing brush.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
