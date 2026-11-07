@@ -7,7 +7,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var ids = ["width", "height", "len-unit", "roll", "roll-len", "roll-wid", "roll-unit",
-    "match", "repeat", "rep-unit", "trim", "spare", "price"];
+    "match", "repeat", "rep-unit", "trim", "spare", "price", "doors", "door-wid"];
   var el = {};
   ids.forEach(function (id) { el[id] = $(id); });
   var out = $("out");
@@ -17,7 +17,8 @@
       w: el.width.value.trim(), h: el.height.value.trim(), lu: el["len-unit"].value,
       r: el.roll.value, rl: el["roll-len"].value.trim(), rw: el["roll-wid"].value.trim(), ru: el["roll-unit"].value,
       m: el.match.value, rep: el.repeat.value.trim(), repu: el["rep-unit"].value,
-      t: el.trim.value.trim(), sp: el.spare.value.trim(), p: el.price.value.trim()
+      t: el.trim.value.trim(), sp: el.spare.value.trim(), p: el.price.value.trim(),
+      dn: el.doors.value.trim(), dw: el["door-wid"].value.trim()
     };
   }
 
@@ -36,6 +37,8 @@
     if (s.t != null) el.trim.value = s.t;
     if (s.sp != null) el.spare.value = s.sp;
     if (s.p != null) el.price.value = s.p;
+    if (s.dn != null) el.doors.value = s.dn;
+    if (s.dw != null) el["door-wid"].value = s.dw;
   }
 
   function cell(k, v, u, big) {
@@ -102,6 +105,17 @@
     return r.match;
   }
 
+  // Turn the door count and width into a list of full-height openings the
+  // engine can deduct whole drops for.
+  function buildOpenings(s) {
+    var n = Math.floor(Number(s.dn));
+    var w = parseFloat(s.dw);
+    if (!(n > 0) || !(w > 0)) return [];
+    var list = [];
+    for (var i = 0; i < n; i++) list.push({ width: { value: w, unit: s.lu }, fullHeight: true });
+    return list;
+  }
+
   function recompute() {
     var s = readState();
     var r = D.plan({
@@ -111,7 +125,8 @@
       match: s.m, repeat: { value: s.rep, unit: s.repu },
       trim: { value: s.t === "" ? undefined : s.t, unit: s.repu },
       spare: s.sp === "" ? undefined : parseFloat(s.sp),
-      pricePerRoll: s.p
+      pricePerRoll: s.p,
+      openings: buildOpenings(s)
     });
     var kind = render(r);
     if (window.Sweep) window.Sweep.react(r.ok ? kind : "bad");
