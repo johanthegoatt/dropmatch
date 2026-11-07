@@ -151,3 +151,37 @@ test("share link round-trips the state", () => {
   assert.deepStrictEqual(D.unpack(packed), state);
   assert.strictEqual(D.unpack("@@not-base64@@!!"), null);
 });
+
+test("a full-height door opening saves whole drops; a window does not", () => {
+  // Euro roll width 0.53 m. A 1.6 m wide full-height patio door = 3 whole drops inside it.
+  const base = D.plan({ width: { value: 10, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free" });
+  const withDoor = D.plan({
+    width: { value: 10, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free",
+    openings: [{ width: { value: 1.6, unit: "m" }, fullHeight: true }]
+  });
+  assert.strictEqual(withDoor.dropsSaved, 3);           // floor(1.6 / 0.53) = 3
+  assert.strictEqual(withDoor.dropsNeeded, base.dropsNeeded - 3);
+  // A window (not full height) saves nothing.
+  const withWindow = D.plan({
+    width: { value: 10, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free",
+    openings: [{ width: { value: 1.6, unit: "m" }, fullHeight: false }]
+  });
+  assert.strictEqual(withWindow.dropsSaved, 0);
+  assert.strictEqual(withWindow.dropsNeeded, base.dropsNeeded);
+});
+
+test("an opening narrower than a roll width saves no whole drops", () => {
+  const r = D.plan({
+    width: { value: 10, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free",
+    openings: [{ width: { value: 0.4, unit: "m" }, fullHeight: true }]
+  });
+  assert.strictEqual(r.dropsSaved, 0);
+});
+
+test("openings can never take the drop count below one", () => {
+  const r = D.plan({
+    width: { value: 1, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free",
+    openings: [{ width: { value: 5, unit: "m" }, fullHeight: true }]
+  });
+  assert.strictEqual(r.dropsNeeded, 1);
+});
