@@ -125,7 +125,24 @@
     var dropsPerRoll = Math.floor((rollLength + 1e-9) / packCut);
     if (dropsPerRoll < 1) return { ok: false, reason: "too-tall" };
 
-    var dropsNeeded = Math.ceil((width - 1e-9) / rollWidth);
+    var rawDrops = Math.ceil((width - 1e-9) / rollWidth);
+
+    // Full-height openings (a door or patio door) have no wall above them to
+    // paper, so the whole strips that fall entirely inside the opening are
+    // drops you don't hang at all. A window has wall above and below it, so you
+    // still hang the full drop and cut the hole out (and the offcut is reused),
+    // which is why only full-height openings reduce the count. The part-covered
+    // strips at each edge of the opening are still full drops, so only the
+    // whole roll-widths inside the opening come off.
+    var dropsSaved = 0;
+    (opts.openings || []).forEach(function (o) {
+      if (!o || !o.fullHeight) return;
+      var w = toM(o.width && o.width.value, o.width && o.width.unit);
+      if (!(w > 0)) return;
+      var whole = Math.floor((w + 1e-9) / rollWidth);
+      if (whole > 0) dropsSaved += whole;
+    });
+    var dropsNeeded = Math.max(1, rawDrops - dropsSaved);
 
     var rollsBare = Math.ceil(dropsNeeded / dropsPerRoll);
 
@@ -163,6 +180,8 @@
       cut: round2(cut),
       offsetWaste: round2(offsetWaste),
       dropsPerRoll: dropsPerRoll,
+      rawDrops: rawDrops,
+      dropsSaved: dropsSaved,
       dropsNeeded: dropsNeeded,
       rollsBare: rollsBare,
       rolls: rolls,
@@ -202,10 +221,15 @@
         " (roughly a " + r.spare + "% margin) to cover a mis-cut or a later repair. Keep a note of the batch number.");
     }
 
+    if (r.dropsSaved > 0) {
+      tips.push("Full-height doors take " + r.dropsSaved + " whole drop" + (r.dropsSaved === 1 ? "" : "s") +
+        " off the count (" + r.rawDrops + " down to " + r.dropsNeeded + "), since there's no wall above a door to paper. The part-covered strips at each edge are still full drops.");
+    }
+
     if (r.tailPerRoll >= r.height * 0.5) {
-      tips.push("The offcut left on each roll is about " + r.tailPerRoll + " m, long enough for the short drops over a door or window, so a normal room doesn't deduct for openings.");
+      tips.push("The offcut left on each roll is about " + r.tailPerRoll + " m, long enough for the short drops over a window, so a normal room doesn't deduct for windows.");
     } else {
-      tips.push("Short bits over doors and windows usually come from the offcuts; only deduct a drop for a very wide opening.");
+      tips.push("Short bits over windows usually come from the offcuts; only deduct a drop for a very wide opening.");
     }
 
     tips.push("Planning figures. Check the roll length, width, pattern repeat and match on the paper's own label, and buy every roll from the same batch so the colour matches.");
