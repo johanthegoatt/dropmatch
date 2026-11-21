@@ -185,3 +185,27 @@ test("openings can never take the drop count below one", () => {
   });
   assert.strictEqual(r.dropsNeeded, 1);
 });
+
+test("a big pattern repeat costs extra rolls versus a free match", () => {
+  // Wide wall, tall-ish room, a large straight-match repeat eats the top of
+  // every drop, so it should pack fewer drops per roll than a free match.
+  const common = {
+    width: { value: 8, unit: "m" }, height: { value: 2.4, unit: "m" },
+    roll: "euro", spare: 0
+  };
+  const free = D.plan(Object.assign({}, common, { match: "free" }));
+  const patt = D.plan(Object.assign({}, common, { match: "straight", repeat: { value: 0.64, unit: "m" } }));
+  assert.ok(patt.ok && free.ok);
+  assert.ok(patt.dropsPerRoll <= free.dropsPerRoll, "pattern packs no more drops per roll");
+  assert.strictEqual(patt.freeRollsBare, free.rollsBare, "free-match equivalent matches a real free-match plan");
+  assert.ok(patt.patternCostRolls >= 1, "the big repeat costs at least one extra roll");
+  assert.strictEqual(patt.patternCostRolls, patt.rollsBare - patt.freeRollsBare);
+  assert.ok(patt.advice.some((t) => /pattern is adding/.test(t)), "advice flags the pattern cost");
+});
+
+test("a free-match paper reports no pattern cost", () => {
+  const r = D.plan({ width: { value: 4, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free", spare: 0 });
+  assert.strictEqual(r.patternCostRolls, 0);
+  assert.strictEqual(r.freeRollsBare, r.rollsBare);
+  assert.ok(!r.advice.some((t) => /pattern is adding/.test(t)));
+});
