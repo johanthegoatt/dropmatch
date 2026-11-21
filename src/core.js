@@ -146,6 +146,17 @@
 
     var rollsBare = Math.ceil(dropsNeeded / dropsPerRoll);
 
+    // What the pattern is costing. A plain (free-match) paper needs only the
+    // height plus trim per drop, with no repeat to line up and no half-drop
+    // offset, so it packs more drops per roll. Working out the bare rolls the
+    // same walls would take as a free match shows how many extra rolls the
+    // chosen pattern adds, which is worth knowing while you're still picking a
+    // paper: a shorter repeat, or a free match, can save a whole roll.
+    var freeCut = height + trim;
+    var freeDropsPerRoll = Math.floor((rollLength + 1e-9) / freeCut);
+    var freeRollsBare = freeDropsPerRoll >= 1 ? Math.ceil(dropsNeeded / freeDropsPerRoll) : rollsBare;
+    var patternCostRolls = Math.max(0, rollsBare - freeRollsBare);
+
     // A spare margin, kept as extra drops so a damaged strip or a later repair
     // can be matched from the same batch. Always at least the bare rolls.
     var spareDrops = Math.ceil(dropsNeeded * (spare / 100));
@@ -184,6 +195,8 @@
       dropsSaved: dropsSaved,
       dropsNeeded: dropsNeeded,
       rollsBare: rollsBare,
+      freeRollsBare: freeRollsBare,
+      patternCostRolls: patternCostRolls,
       rolls: rolls,
       spareDrops: spareDrops,
       leftoverDrops: leftoverDrops,
@@ -214,6 +227,11 @@
     } else {
       tips.push("Offset (half-drop) match: the pattern steps down half a repeat on every other drop, so it lines up on the diagonal and wastes about " +
         r.offsetWaste + " m more per alternate drop. That's why it needs more paper.");
+    }
+
+    if (r.patternCostRolls > 0) {
+      tips.push("The pattern is adding about " + r.patternCostRolls + " roll" + (r.patternCostRolls === 1 ? "" : "s") +
+        " over a plain paper (" + r.freeRollsBare + " vs " + r.rollsBare + " before the spare), because lining up the repeat wastes the top of each drop. A paper with a smaller repeat, or a free match, would need fewer rolls for the same walls.");
     }
 
     if (r.leftoverDrops > 0) {
