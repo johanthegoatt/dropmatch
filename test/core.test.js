@@ -209,3 +209,29 @@ test("a free-match paper reports no pattern cost", () => {
   assert.strictEqual(r.freeRollsBare, r.rollsBare);
   assert.ok(!r.advice.some((t) => /pattern is adding/.test(t)));
 });
+
+test("pastePacks: one sachet covers the default five rolls", () => {
+  assert.strictEqual(D.pastePacks(5).packs, 1);
+  assert.strictEqual(D.pastePacks(6).packs, 2);   // tips into a second
+  assert.strictEqual(D.pastePacks(10).packs, 2);
+  assert.strictEqual(D.pastePacks(5).rollsPerPack, D.ROLLS_PER_PACK);
+});
+
+test("pastePacks: a heavier paper covers fewer rolls per pack", () => {
+  const p = D.pastePacks(8, { rollsPerPack: 4 });
+  assert.strictEqual(p.packs, 2);
+  assert.strictEqual(p.rollsPerPack, 4);
+});
+
+test("pastePacks: never fewer than one pack, null for no rolls", () => {
+  assert.strictEqual(D.pastePacks(1).packs, 1);
+  assert.strictEqual(D.pastePacks(0), null);
+  assert.strictEqual(D.pastePacks("x"), null);
+});
+
+test("plan carries a paste estimate alongside the rolls", () => {
+  const r = D.plan({ width: { value: 4, unit: "m" }, height: { value: 2.4, unit: "m" }, match: "free" });
+  assert.ok(r.ok);
+  assert.ok(r.paste);
+  assert.strictEqual(r.paste.packs, D.pastePacks(r.rolls).packs);
+});
