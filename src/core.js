@@ -210,8 +210,30 @@
     var price = num(opts.pricePerRoll);
     out.cost = isFinite(price) && price > 0 ? round2(rolls * price) : null;
 
+    out.paste = pastePacks(rolls, { rollsPerPack: opts.rollsPerPack });
+
     out.advice = advise(out);
     return out;
+  }
+
+  // The buy people forget: the paste. A traditional paste-the-paper wallpaper
+  // needs adhesive mixed from a sachet, and one sachet covers a handful of
+  // rolls. The box figure is typically about 5 rolls of a standard-weight paper
+  // (fewer for a heavy or embossed paper that drinks more), so the default is 5
+  // and you set your own from the pack. A ready-mixed tub for paste-the-wall
+  // papers is bought the same way, by how many rolls it covers. Returns the
+  // packs to buy, never fewer than one when there are rolls to hang.
+  var ROLLS_PER_PACK = 5;   // sachet of all-purpose paste, standard-weight paper
+  function pastePacks(rolls, opts) {
+    opts = opts || {};
+    var r = num(rolls);
+    if (!(r > 0)) return null;
+    var per = num(opts.rollsPerPack);
+    if (!(per > 0)) per = ROLLS_PER_PACK;
+    return {
+      rollsPerPack: round1(per),
+      packs: Math.max(1, Math.ceil(r / per - 1e-9))
+    };
   }
 
   function advise(r) {
@@ -276,6 +298,7 @@
   return {
     IN: IN, FT: FT, ROLLS: ROLLS, MATCHES: MATCHES,
     toM: toM, round1: round1, round2: round2, ceilTo: ceilTo,
-    cutLength: cutLength, plan: plan, advise: advise, pack: pack, unpack: unpack
+    cutLength: cutLength, plan: plan, advise: advise, pastePacks: pastePacks,
+    ROLLS_PER_PACK: ROLLS_PER_PACK, pack: pack, unpack: unpack
   };
 });
