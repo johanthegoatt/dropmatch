@@ -67,6 +67,7 @@
       cell("Drops needed", r.dropsNeeded, "") +
       cell("Per roll", r.dropsPerRoll, "") +
       cell("Cut length", r.cut, "m") +
+      (r.paste ? cell("Paste packs", r.paste.packs, "") : "") +
       (r.cost != null ? cell("Cost", r.cost, "") : "");
 
     var wastePct = Math.max(2, Math.min(100, r.wastePercent));
@@ -97,6 +98,8 @@
           '<div class="opt-h">The order</div>' +
           '<div class="grid">' + grid + '</div>' +
           wasteBlock +
+          (r.paste ? '<p class="fill-label">Plus about ' + r.paste.packs + ' pack' + (r.paste.packs === 1 ? "" : "s") +
+            ' of paste, reckoning one covers ' + r.paste.rollsPerPack + ' rolls (a heavy or embossed paper drinks more, so check the box).</p>' : '') +
         '</div>' +
       '</div>' +
       '<div class="result"><h3>How it lines up</h3>' + matchBox + '</div>' +
